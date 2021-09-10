@@ -1,11 +1,14 @@
-FROM alpine:3.12.1 as config-alpine
+ARG ALPINE_TAG=3.14.1
+FROM alpine:$ALPINE_TAG as config-alpine
 
 RUN apk add --no-cache tzdata
 
 RUN cp -v /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN echo "America/New_York" > /etc/timezone
 
-FROM alpine:3.12.1 as src-fluentd
+FROM alpine:$ALPINE_TAG as src-fluentd
+
+ARG BRANCH=v0.0.0
 
 RUN apk add --no-cache \
  build-base \
@@ -13,7 +16,7 @@ RUN apk add --no-cache \
  ruby \
  ruby-dev
 
-RUN git clone --branch v1.11.5 --depth 1 https://github.com/fluent/fluentd.git
+RUN git clone --branch $BRANCH --depth 1 https://github.com/fluent/fluentd.git
 
 WORKDIR /fluentd
 
@@ -22,7 +25,7 @@ RUN gem install bundler \
 && bundle exec rake build \
 && gem install pkg/fluentd-*.gem etc bigdecimal json webrick
 
-FROM alpine:3.12.1
+FROM alpine:$ALPINE_TAG
 
 COPY --from=config-alpine /etc/localtime /etc/localtime
 COPY --from=config-alpine /etc/timezone  /etc/timezone
