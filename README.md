@@ -2,6 +2,8 @@
 
 A kubernetes cluster centralized logging platform "-v /var/log/pods:/var/log/pods"
 
+docker build --build-arg ALPINE_TAG=3.14.2 --build-arg BRANCH=v1.14.0 --build-arg RUBY_TAG=2.7.4-alpine3.14 --build-arg VERSION=1.14.0 --file Containerfile --no-cache --tag fluentd:dev .
+
 ## Container
 
 The docker container consists of a single fluentd installation.  Multiple instance configurations are defined.

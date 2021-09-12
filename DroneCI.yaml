@@ -14,7 +14,7 @@ steps:
     ALPINE_TAG: 3.14.1
     OCI_CONTAINER: fluentd
     OCI_REPOSITORY: docker://docker.io/gautada
-    OCI_VERSION: v1.11.5
+    OCI_VERSION: v1.14.0.5
   commands:
   - buildah login --username=$DOCKER_USERNAME --password=$DOCKER_PASSWORD docker.io
   - buildah bud --build-arg ALPINE_TAG=$ALPINE_TAG --build-arg BRANCH=$OCI_VERSION --file Containerfile --tag localhost/$OCI_CONTAINER:dev
