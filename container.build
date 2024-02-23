@@ -1,0 +1,96 @@
+ARG ALPINE_VERSION=latest
+
+# │ STAGE: SOURCE
+# ╰――――――――――――――――――――――――――――――――――――――――――――――――――――――
+FROM gautada/alpine:$ALPINE_VERSION as SOURCE
+
+ARG FLUENTD_VERSION=1.16.3
+ARG FLUENTD_BRANCH=v"$FLUENTD_VERSION"
+
+RUN /sbin/apk add --no-cache build-base git \
+ ruby ruby-dev
+
+RUN /usr/bin/git clone --branch $FLUENTD_BRANCH --depth 1 https://github.com/fluent/fluentd.git
+
+WORKDIR /fluentd
+
+RUN /usr/bin/gem install etc bigdecimal bundler json webrick
+RUN /usr/bin/bundle install
+RUN /usr/bin/bundle exec rake build
+
+# │ STAGE: CONTAINER
+# ╰――――――――――――――――――――――――――――――――――――――――――――――――――――――
+FROM gautada/alpine:$ALPINE_VERSION as CONTAINER
+
+# ╭――――――――――――――――――――╮
+# │ METADATA           │
+# ╰――――――――――――――――――――╯
+LABEL source="https://github.com/gautada/fluent-container.git"
+LABEL maintainer="Adam Gautier <adam@gautier.org>"
+LABEL description="A container for unified logins"
+
+# ╭―
+# │ USER
+# ╰――――――――――――――――――――
+ARG USER=fluentd
+RUN /usr/sbin/usermod -l $USER alpine
+RUN /usr/sbin/usermod -d /home/$USER -m $USER
+RUN /usr/sbin/groupmod -n $USER alpine
+RUN /bin/echo "$USER:$USER" | /usr/sbin/chpasswd
+
+# ╭―
+# │ PRIVILEGES
+# ╰――――――――――――――――――――
+# COPY privileges /etc/container/privileges
+
+# ╭―
+# │ BACKUP
+# ╰――――――――――――――――――――
+# No backup needed and even disable the automated hourly backup
+# COPY backup /etc/container/backup
+# RUN rm -f /etc/periodic/hourly/container-backup
+
+# ╭―
+# │ ENTRYPOINT
+# ╰――――――――――――――――――――
+COPY entrypoint /etc/container/entrypoint
+
+# ╭――――――――――――――――――――╮
+# │ APPLICATION        │
+# ╰――――――――――――――――――――╯
+
+RUN /bin/mkdir -p /mnt/volumes/logs
+
+COPY --from=SOURCE /fluentd/pkg/fluentd-*.gem /opt/fluentd/
+# COPY dev.conf /etc/fluentd/dev.conf
+
+RUN /sbin/apk add --no-cache build-base ruby ruby-dev
+
+
+
+RUN gem install /opt/fluentd/fluentd-*.gem \
+                etc \
+				bigdecimal \
+				json \
+				webrick \
+				fluent-plugin-rewrite-tag-filter 
+				
+RUN apk del ruby-dev build-base
+
+# RUN /usr/bin/fluentd --setup /etc/fluentd
+# RUN mkdir -p /var/logs/pods
+
+# RUN /sbin/apk del --no-cache build-base ruby-dev
+# RUN /bin/ln -fsv /fluentd/bin/* /usr/bin/
+
+# ╭――――――――――――――――――――╮
+# │ CONTAINER          │
+# ╰――――――――――――――――――――╯
+
+USER $USER
+VOLUME /mnt/volumes/backup
+VOLUME /mnt/volumes/configmaps
+VOLUME /mnt/volumes/container
+VOLUME /mnt/volumes/secrets
+VOLUME /mnt/volumes/source
+WORKDIR /home/$USER
