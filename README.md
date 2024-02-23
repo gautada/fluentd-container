@@ -1,5 +1,7 @@
 # fluentd
 
+[fluentd](https://www.fluentd.org) is an open source data collector, which lets you unify the data collection and consumption for a better use and understanding of data.
+
 
 
 A kubernetes cluster centralized logging platform "-v /var/log/pods:/var/log/pods"
