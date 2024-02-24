@@ -59,10 +59,10 @@ COPY entrypoint /etc/container/entrypoint
 # │ APPLICATION        │
 # ╰――――――――――――――――――――╯
 
-RUN /bin/mkdir -p /mnt/volumes/logs
+RUN /bin/mkdir -p /mnt/volumes/logs/pods /mnt/volumes/logs/nodes
 
+RUN /bin/ln -fsv /mnt/volumes/configmaps/fluentd.conf /etc/container/fluentd.conf
 COPY --from=SOURCE /fluentd/pkg/fluentd-*.gem /opt/fluentd/
-# COPY dev.conf /etc/fluentd/dev.conf
 
 RUN /sbin/apk add --no-cache build-base ruby ruby-dev
 
