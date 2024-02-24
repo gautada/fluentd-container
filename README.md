@@ -1,5 +1,9 @@
 # fluentd
 
+[fluentd](https://www.fluentd.org) is an open source data collector, which lets you unify the data collection and consumption for a better use and understanding of data.
+
+
+
 A kubernetes cluster centralized logging platform "-v /var/log/pods:/var/log/pods"
 
 docker build --build-arg ALPINE_TAG=3.14.2 --build-arg BRANCH=v1.14.0 --build-arg RUBY_TAG=2.7.4-alpine3.14 --build-arg VERSION=1.14.0 --file Containerfile --no-cache --tag fluentd:dev .

@@ -1,0 +1,48 @@
+version: "3.9"
+services:
+  fluentd:
+    build:
+      args:
+        ALPINE_VERSION: "latest"
+        FLUENTD_VERSION: "1.16.3"
+      context: .
+      dockerfile: container.build
+      no_cache: true  
+      tags:
+        - "fluentd:build"
+        - "gautada/fluentd:build"
+        - "gautada/fluentd:latest"
+    image: "gautada/fluent:latest"
+    ports:
+    - "8080:8080/tcp"
+    - "24224:24224/tcp"
+    environment:
+    - FLUENTD_CONFIG=${COMPOSE_FLUENTD_CONFIG}
+    - FLUENTD_OPTIONS=${COMPOSE_FLUENTD_OPTIONS}
+    volumes:
+      - "Container:/mnt/volumes/container"
+      - "Backup:/mnt/volumes/backup"
+      - "Configmaps:/mnt/volumes/configmaps"
+      - "Secrets:/mnt/volumes/secrets"
+      - "Logs:/mnt/volumes/logs"
+
+volumes:
+  Backup:
+    external: true
+    name: "Backup"
+
+  Configmaps:
+    external: true
+    name: "Configmaps"
+    
+  Container:
+    external: true
+    name: "Container"
+    
+  Logs:
+    external: true
+    name: "Logs"
+    
+  Secrets:
+    external: true
+    name: "Secrets"
