@@ -37,6 +37,8 @@ RUN /usr/sbin/usermod -l $USER alpine
 RUN /usr/sbin/usermod -d /home/$USER -m $USER
 RUN /usr/sbin/groupmod -n $USER alpine
 RUN /bin/echo "$USER:$USER" | /usr/sbin/chpasswd
+# Adding user to root group to access logs
+RUN /usr/sbin/addgroup $USER root
 
 # ╭―
 # │ PRIVILEGES
