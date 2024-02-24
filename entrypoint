@@ -16,8 +16,11 @@ container_version() {
 container_entrypoint() {
  # /bin/echo "General blocking function."
  # /usr/bin/tail -f /dev/null
- # /bin/echo "fluentd config file: $FLUENTD_CONFIG"
+ if [ -z "$FLUENTD_CONFIG" ] ; then
+  export FLUENTD_CONFIG=/etc/container/fluentd.conf
+ fi
+ /bin/echo "fluentd config file: $FLUENTD_CONFIG"
  /bin/echo "fluentd options: $FLUENTD_OPTIONS"
- # /usr/bin/fluentd --config $FLUENTD_CONFIG $FLUENTD_OPTIONS
- /usr/bin/fluentd --config /etc/container/fluentd.conf $FLUENTD_OPTIONS
+ /usr/bin/fluentd --config $FLUENTD_CONFIG $FLUENTD_OPTIONS
+ # /usr/bin/fluentd --config /etc/container/fluentd.conf $FLUENTD_OPTIONS
 }

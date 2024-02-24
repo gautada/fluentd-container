@@ -2,3 +2,5 @@
 *.xcodeproj/
 volumes
 .DS_STORE
+manifest
+
