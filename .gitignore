@@ -1,3 +1,6 @@
 # Ignore Xcode files
 *.xcodeproj/
 volumes
+.DS_STORE
+manifest
+

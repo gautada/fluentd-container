@@ -37,6 +37,9 @@ RUN /usr/sbin/usermod -l $USER alpine
 RUN /usr/sbin/usermod -d /home/$USER -m $USER
 RUN /usr/sbin/groupmod -n $USER alpine
 RUN /bin/echo "$USER:$USER" | /usr/sbin/chpasswd
+# Adding user to root and adm group to access logs
+RUN /usr/sbin/addgroup $USER root
+RUN /usr/sbin/addgroup $USER adm
 
 # ╭―
 # │ PRIVILEGES
@@ -59,10 +62,10 @@ COPY entrypoint /etc/container/entrypoint
 # │ APPLICATION        │
 # ╰――――――――――――――――――――╯
 
-RUN /bin/mkdir -p /mnt/volumes/logs
+RUN /bin/mkdir -p /mnt/volumes/logs/pods /mnt/volumes/logs/nodes
 
+RUN /bin/ln -fsv /mnt/volumes/configmaps/fluentd.conf /etc/container/fluentd.conf
 COPY --from=SOURCE /fluentd/pkg/fluentd-*.gem /opt/fluentd/
-# COPY dev.conf /etc/fluentd/dev.conf
 
 RUN /sbin/apk add --no-cache build-base ruby ruby-dev
 
