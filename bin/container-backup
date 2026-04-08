@@ -1,0 +1,33 @@
+#!/bin/ash
+# Nyx Calder - Backup script for fluentd logs and position files
+# Created on: 2026-04-07
+set -e
+
+BACKUP_DIR="/mnt/volumes/backup"
+LOG_DIR="/var/log/fluentd"
+POS_DIR="/var/lib/fluentd/pos"
+TIMESTAMP=$(date +%Y%m%d%H%M%S)
+BACKUP_FILE="$BACKUP_DIR/fluentd-backup-$TIMESTAMP.tar.gz"
+
+echo "Starting fluentd backup..."
+
+# Ensure backup directory exists
+mkdir -p "$BACKUP_DIR"
+
+# Check if there is anything to backup
+if [ ! -d "$LOG_DIR" ] && [ ! -d "$POS_DIR" ]; then
+    echo "Nothing to backup ($LOG_DIR and $POS_DIR do not exist)."
+    exit 0
+fi
+
+# Create tarball of logs and position files
+# Capture /var/log/fluentd and /var/lib/fluentd/pos if they exist
+echo "Archiving to $BACKUP_FILE..."
+tar -czf "$BACKUP_FILE" "$LOG_DIR" "$POS_DIR" 2>/dev/null || true
+
+# Keep only last 10 backups
+echo "Cleaning up old backups..."
+# shellcheck disable=SC2012
+ls -1tr "$BACKUP_DIR"/fluentd-backup-*.tar.gz 2>/dev/null | head -n -10 | xargs rm -f 2>/dev/null || true
+
+echo "Backup complete: $BACKUP_FILE"
