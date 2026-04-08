@@ -49,9 +49,10 @@ RUN /usr/sbin/addgroup $USER adm
 # ╭―
 # │ BACKUP
 # ╰――――――――――――――――――――
-# No backup needed and even disable the automated hourly backup
-RUN rm -f /etc/periodic/hourly/container-backup
-# COPY backup /etc/container/backup
+# Backup enabled for fluent logs and position files
+COPY bin/container-backup /etc/container/backup
+RUN /bin/mkdir -p /etc/periodic/hourly
+RUN /bin/ln -fsv /etc/container/backup /etc/periodic/hourly/container-backup
 
 # ╭―
 # │ ENTRYPOINT
@@ -63,6 +64,8 @@ COPY entrypoint /etc/container/entrypoint
 # ╰――――――――――――――――――――╯
 
 RUN /bin/mkdir -p /mnt/volumes/logs/pods /mnt/volumes/logs/nodes
+RUN /bin/mkdir -p /var/log/fluentd /var/lib/fluentd/pos
+RUN /usr/sbin/chown -R $USER:$USER /var/log/fluentd /var/lib/fluentd/pos
 
 RUN /bin/ln -fsv /mnt/volumes/configmaps/fluentd.conf /etc/container/fluentd.conf
 COPY --from=SOURCE /fluentd/pkg/fluentd-*.gem /opt/fluentd/
